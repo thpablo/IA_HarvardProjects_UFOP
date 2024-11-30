@@ -81,20 +81,20 @@ def winner(board):
 
     # Verify rows
     for row in range(3):
-        if board[row][0] == board[row][1] == board[row][2]:
+        if board[row][0] == board[row][1] == board[row][2] and board[row][0] != None:
             return board[row][0]
 
     # Verify columns
     for col in range(3):
-        if board[0][col] == board[1][col] == board[2][col]:
+        if board[0][col] == board[1][col] == board[2][col] and board[0][col] != None:
             return board[0][col]
     
     # Verify main diagonal
-    if board[0][0] == board[1][1] == board[2][2]:
+    if board[0][0] == board[1][1] == board[2][2] and board[0][0] != None:
         return board[0][0]
     
     # Verify secondary diagonal
-    if board[0][2] == board[1][1] == board[2][0]:
+    if board[0][2] == board[1][1] == board[2][0] and board[0][2] != None:
         return board[0][2]
 
     return None
