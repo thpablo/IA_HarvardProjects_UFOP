@@ -26,10 +26,8 @@ def player(board):
 
     # The first player is always X
     if board == initial_state():
-        print("Estado Inicial: Vez do X")
         return X
     elif terminal(board):
-        print("Jogo terminado")
         return None
     else:  # Verify the quanty of O's in the board and return the next player
         countO = sum(row.count(O) for row in board)
@@ -178,5 +176,3 @@ def minimax(board):
         return bestMove    
 
     raise NotImplementedError
-
-print(1 % 2)
