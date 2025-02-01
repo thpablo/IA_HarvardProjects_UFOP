@@ -127,49 +127,66 @@ def powerset(s):
         )
     ]
 
-
 def parent_prob(num_genes):
-        pass_gene = num_genes / 2
-        return pass_gene * (1 - PROBS["mutation"]) + (1 - pass_gene) * PROBS["mutation"]
+    """
+    Calcula a probabilidade de um pai passar um gene para o filho, considerando a mutação.
+    :param num_genes: Número de cópias do gene que o pai possui (0, 1 ou 2).
+    :return: Probabilidade de o pai passar o gene ao filho.
+    """
+    pass_gene = num_genes / 2  # Probabilidade de passar o gene sem mutação (0, 0.5 ou 1).
+    return pass_gene * (1 - PROBS["mutation"]) + (1 - pass_gene) * PROBS["mutation"]
+    # Retorna a probabilidade de passar o gene, considerando a mutação:
+    # - pass_gene * (1 - mutation): Probabilidade de passar o gene sem mutação.
+    # - (1 - pass_gene) * mutation: Probabilidade de passar o gene por mutação.
+
 
 def joint_probability(people, one_gene, two_genes, have_trait):
     """
-    Compute and return a joint probability.
+    Calcula a probabilidade conjunta de uma configuração específica de genes e traços para todas as pessoas.
+    :param people: Dicionário contendo informações sobre as pessoas.
+    :param one_gene: Conjunto de pessoas com uma cópia do gene.
+    :param two_genes: Conjunto de pessoas com duas cópias do gene.
+    :param have_trait: Conjunto de pessoas que possuem o traço.
+    :return: Probabilidade conjunta da configuração.
     """
-    prob = 1.0
-    for person in people:
+    prob = 1.0  # Inicializa a probabilidade conjunta como 1 (neutro para multiplicação).
+    for person in people:  # Itera sobre cada pessoa no dicionário.
+        # Determina quantas cópias do gene a pessoa possui (0, 1 ou 2).
         quant_genes = 1 if person in one_gene else 2 if person in two_genes else 0
+        # Verifica se a pessoa possui o traço.
         trait_status = person in have_trait
 
-        if people[person]['mother'] is None:
-            gene_prob = PROBS['gene'][quant_genes]
-            prob *= gene_prob * PROBS['trait'][quant_genes][trait_status]
-        else:
-            mother = people[person]['mother']
-            father = people[person]['father']
+        if people[person]['mother'] is None:  # Se a pessoa não tem pais (é uma raiz da árvore genealógica).
+            gene_prob = PROBS['gene'][quant_genes]  # Usa a probabilidade incondicional do gene.
+            prob *= gene_prob * PROBS['trait'][quant_genes][trait_status]  # Atualiza a probabilidade conjunta.
+        else:  # Se a pessoa tem pais.
+            mother = people[person]['mother']  # Nome da mãe.
+            father = people[person]['father']  # Nome do pai.
 
-            # Determine parents' gene counts
+            # Determina quantas cópias do gene a mãe possui (0, 1 ou 2).
             mother_genes = 1 if mother in one_gene else 2 if mother in two_genes else 0
+            # Determina quantas cópias do gene o pai possui (0, 1 ou 2).
             father_genes = 1 if father in one_gene else 2 if father in two_genes else 0
 
-            # Probability of passing a gene considering mutation
+            # Calcula a probabilidade de a mãe passar o gene ao filho, considerando mutação.
             prob_mother = parent_prob(mother_genes)
+            # Calcula a probabilidade de o pai passar o gene ao filho, considerando mutação.
             prob_father = parent_prob(father_genes)
 
-            # Calculate the probability for the child's gene count
-            if quant_genes == 0:
-                p = (1 - prob_father) * (1 - prob_mother)
-            elif quant_genes == 1:
-                p = (1 - prob_father) * prob_mother + prob_father * (1 - prob_mother)
-            elif quant_genes == 2:
-                p = prob_father * prob_mother
-            else:
+            # Calcula a probabilidade da pessoa ter a quantidade de genes especificada.
+            if quant_genes == 0:  # Se a pessoa não tem cópias do gene.
+                p = (1 - prob_father) * (1 - prob_mother)  # Ambos os pais não passam o gene.
+            elif quant_genes == 1:  # Se a pessoa tem uma cópia do gene.
+                p = (1 - prob_father) * prob_mother + prob_father * (1 - prob_mother)  # Um dos pais passa o gene.
+            elif quant_genes == 2:  # Se a pessoa tem duas cópias do gene.
+                p = prob_father * prob_mother  # Ambos os pais passam o gene.
+            else:  # Caso inválido (não deve ocorrer).
                 p = 0
 
+            # Atualiza a probabilidade conjunta com a probabilidade do gene e do traço.
             prob *= p * PROBS['trait'][quant_genes][trait_status]
 
-    return prob
-
+    return prob  # Retorna a probabilidade conjunta calculada.
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
     """
